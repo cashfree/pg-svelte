@@ -10,7 +10,7 @@
 
 <BaseComponent
 	bind:component
-	type="cardNumber"
+	type="cardExpiry"
 	on:ready
 	on:focus
 	on:blur

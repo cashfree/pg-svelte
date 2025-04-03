@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import * as Cashfree from '$lib';
 	let env = 'production';
-	let styleObject = {
+	let styles = {
 		fonts: [],
 		base: {
 			fontSize: '16px',
@@ -20,6 +20,7 @@
 			color: '#df1b41'
 		}
 	};
+
 	function iAmReady() {
 		console.log('I am r2eady');
 	}
@@ -29,27 +30,34 @@
 	let cardComponent;
 
 	$: {
-		console.log('>>>>>>----  +page:32 ', cardComponent);
 	}
 </script>
 
-<Cashfree.Root {env} {styleObject}>
-	<div class="" slot="CardNumber">
+<Cashfree.Root {env} {styles}>
+	<div class="" style="width: 300px;">
 		<label>Card Number</label>
-		<Cashfree.CardNumber
-			bind:component={cardComponent}
-			class="raj"
-			{values}
-			style="width: 220px;"
-		/>
+		<Cashfree.CardNumber bind:component={cardComponent} class="raj" on:change={iAmReady} {values} />
 	</div>
+	<div class="" style="width: 100px;margin-top: 10px;">
+		<label>Card Expiry</label>
+		<Cashfree.CardExpiry />
+	</div>
+	<div class="" style="width: 100px;margin-top: 10px;">
+		<label>Card CVV</label>
+		<Cashfree.CardCVV />
+	</div>
+	<div class="" style="width: 300px;margin-top: 10px;">
+		<label> Card Holder Name</label>
+		<Cashfree.CardHolder />
+	</div>
+	<button
+		disabled
+		style="width: 300px;margin-top: 10px;"
+		on:click={() => {
+			cardComponent.clear();
+			console.log('>>>>>>----  +page:53 ', cardComponent.data());
+		}}
+	>
+		Click
+	</button>
 </Cashfree.Root>
-
-<button
-	on:click={() => {
-		cardComponent.clear();
-		console.log('>>>>>>----  +page:53 ', cardComponent.data());
-	}}
->
-	Click
-</button>

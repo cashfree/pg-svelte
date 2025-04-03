@@ -10,7 +10,7 @@
 
 <BaseComponent
 	bind:component
-	type="cardNumber"
+	type="cardHolder"
 	on:ready
 	on:focus
 	on:blur

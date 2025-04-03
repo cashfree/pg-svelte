@@ -10,7 +10,7 @@
 
 <BaseComponent
 	bind:component
-	type="cardNumber"
+	type="cardCvv"
 	on:ready
 	on:focus
 	on:blur
