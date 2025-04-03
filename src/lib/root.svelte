@@ -27,8 +27,6 @@
 
 <div>
 	{#if $cashfreeStore}
-		<slot></slot>
 		<slot name="CardNumber"></slot>
 	{/if}
-	<slot></slot>
 </div>

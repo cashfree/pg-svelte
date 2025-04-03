@@ -20,11 +20,36 @@
 			color: '#df1b41'
 		}
 	};
+	function iAmReady() {
+		console.log('I am r2eady');
+	}
+	let values = {
+		placeholder: '4xxx xxxx xxxx 4321'
+	};
+	let cardComponent;
+
+	$: {
+		console.log('>>>>>>----  +page:32 ', cardComponent);
+	}
 </script>
 
 <Cashfree.Root {env} {styleObject}>
 	<div class="" slot="CardNumber">
 		<label>Card Number</label>
-		<Cashfree.CardNumber class="raj" style="width: 220px;">asa</Cashfree.CardNumber>
+		<Cashfree.CardNumber
+			bind:component={cardComponent}
+			class="raj"
+			{values}
+			style="width: 220px;"
+		/>
 	</div>
 </Cashfree.Root>
+
+<button
+	on:click={() => {
+		cardComponent.clear();
+		console.log('>>>>>>----  +page:53 ', cardComponent.data());
+	}}
+>
+	Click
+</button>
