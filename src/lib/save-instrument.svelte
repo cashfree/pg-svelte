@@ -7,7 +7,7 @@
 
 <BaseComponent
 	bind:component
-	type="cardNumber"
+	type="savePaymentInstrument"
 	on:ready
 	on:focus
 	on:blur

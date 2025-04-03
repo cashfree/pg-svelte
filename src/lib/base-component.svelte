@@ -10,7 +10,7 @@
 	export let className = '';
 	export let type;
 	export let values = {};
-	const { x, env, cashfree, stylesGlobal, status, components } = getContext(key);
+	const { mode, cashfree, stylesGlobal, status, components } = getContext(key);
 	export let styles = $stylesGlobal || {};
 
 	export { className as class };
@@ -30,6 +30,7 @@
 			callback: function () {
 				//console.log('>>>>>>----  base-component:31 ', $status, component.isComplete());
 				//$status.complete = $status.complete && component.isComplete();
+				$components[type] = component;
 			}
 		},
 		{ eventName: 'empty', callback: void 0 },

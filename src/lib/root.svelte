@@ -3,8 +3,10 @@
 	import { writable } from 'svelte/store';
 	import { key } from './context-key';
 	import { load } from '@cashfreepayments/cashfree-js';
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
 
-	export let env = 'sandbox';
+	export let mode = 'sandbox';
 	export let styles = {};
 
 	// Create a writable store for the cashfree instance
@@ -19,43 +21,46 @@
 
 	// Set context with the store - only once during initialization
 	setContext(key, {
-		env,
+		mode,
 		cashfree: cashfreeStore,
 		stylesGlobal: stylesStore,
-		status: statusStore,
 		components: componentsStore
 	});
-
+	let instance = null;
 	onMount(async function () {
-		const instance = await load({
-			mode: 'sandbox'
+		instance = await load({
+			mode: mode
 		});
 		// Update the store, not the context
 		cashfreeStore.set(instance);
 		stylesStore.set(styles);
-		statusStore.set({
-			loading: false,
-			error: null,
-			complete: true
-		});
 		componentsStore.set({});
+		state.loading = false;
 	});
 
-	$: {
-		//log values of stateStore
-		componentsStore.subscribe((components) => {
-			//foeach key check is complete
-			for (const key in components) {
-				// if (components[key].isComplete()) {
-				// 	// statusStore.update((status) => ({
-				// 	// 	...status,
-				// 	// 	complete: true
-				// 	// }));
-				// 	console.log('>>>>>>----  root:54 ', key, components[key].isComplete());
-				// }
-				console.log('>>>>>>----  root:54 ', key, components[key].isComplete());
+	let components = {};
+	let state = {
+		complete: false,
+		loading: true
+	};
+
+	componentsStore.subscribe((data) => {
+		components = data;
+		state.complete = true;
+		for (const key in components) {
+			if (components[key].isComplete()) {
+				state.complete = state.complete && true;
+			} else {
+				state.complete = state.complete && false;
 			}
-		});
+		}
+		dispatch('state', state);
+	});
+
+	export function pay(paymentOptions) {
+		paymentOptions.paymentMethod = components.cardNumber;
+		paymentOptions.savePaymentInstrument = components.savePaymentInstrument;
+		return instance.pay(paymentOptions);
 	}
 </script>
 

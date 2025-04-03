@@ -1,63 +1,92 @@
 <script>
 	import { onMount } from 'svelte';
+	import '../demo.css';
 	import * as Cashfree from '$lib';
-	let env = 'production';
-	let styles = {
-		fonts: [],
-		base: {
-			fontSize: '16px',
-			// fontFamily: 'Lato',
-			backgroundColor: '#FFFFFF',
-			':focus': {
-				border: '1px solid #2361d5'
-			},
-			border: '1px solid #e6e6e6',
-			borderRadius: '5px',
-			padding: '16px',
-			color: '#000000'
-		},
-		invalid: {
-			color: '#df1b41'
+	let mode = 'sandbox';
+
+	let isReadyForPayment = false;
+	function checkState(e) {
+		isReadyForPayment = e.detail.complete;
+	}
+	let cashfreeCard;
+	let errorMsg = '';
+
+	async function doPayment(e) {
+		try {
+			let res = await cashfreeCard.pay(paymentOptions);
+			if (!!res.error) {
+				throw new Error(res.error.message);
+			}
+		} catch (error) {
+			errorMsg = error.message;
+			console.error('Payment failed:', error);
 		}
-	};
-
-	function iAmReady() {
-		console.log('I am r2eady');
 	}
-	let values = {
-		placeholder: '4xxx xxxx xxxx 4321'
-	};
-	let cardComponent;
 
-	$: {
-	}
+	let saveText = {
+		label: 'Save this card for future payments'
+	};
+	let paymentOptions = {
+		paymentSessionId: '',
+		redirectTarget: '_self',
+		redirect: 'if_required',
+		offerId: ''
+	};
 </script>
 
-<Cashfree.Root {env} {styles}>
-	<div class="" style="width: 300px;">
-		<label>Card Number</label>
-		<Cashfree.CardNumber bind:component={cardComponent} class="raj" on:change={iAmReady} {values} />
-	</div>
-	<div class="" style="width: 100px;margin-top: 10px;">
-		<label>Card Expiry</label>
-		<Cashfree.CardExpiry />
-	</div>
-	<div class="" style="width: 100px;margin-top: 10px;">
-		<label>Card CVV</label>
-		<Cashfree.CardCVV />
-	</div>
-	<div class="" style="width: 300px;margin-top: 10px;">
-		<label> Card Holder Name</label>
-		<Cashfree.CardHolder />
-	</div>
-	<button
-		disabled
-		style="width: 300px;margin-top: 10px;"
-		on:click={() => {
-			cardComponent.clear();
-			console.log('>>>>>>----  +page:53 ', cardComponent.data());
-		}}
-	>
-		Click
-	</button>
-</Cashfree.Root>
+<div class="flex items-center justify-center bg-blue-100 p-4 rounded-lg">
+	<h1 class="text-xs font-bold text-blue-800">Cashfree Card Component - Svelte</h1>
+</div>
+
+<div class="container mx-auto max-w-md mt-10 p-4 shadow-md rounded-md bg-white">
+	<Cashfree.Root bind:this={cashfreeCard} {mode} on:state={checkState}>
+		<div class="flex flex-col gap-y-4">
+			<div class="flex flex-col gap-y-1">
+				<label class="text-sm font-medium">Card Number</label>
+				<Cashfree.CardNumber class="input-text" />
+			</div>
+			<div class="flex flex-col gap-y-1">
+				<label class="text-sm font-medium">Card Holder Name</label>
+				<Cashfree.CardHolder class="input-text" />
+			</div>
+			<div class="grid grid-cols-4 gap-x-2 justify-between">
+				<div class="col-span-2 flex flex-row gap-x-2">
+					<div class="flex flex-col gap-y-1">
+						<label class="text-sm font-medium">Expiry</label>
+						<Cashfree.CardExpiry class="input-text" />
+					</div>
+					<div class="flex flex-col gap-y-1">
+						<label class="text-sm font-medium">CVV</label>
+						<Cashfree.CardCVV class="input-text" />
+					</div>
+				</div>
+			</div>
+			<div class="flex justify-start">
+				<Cashfree.SaveInstrument values={saveText} />
+			</div>
+			<div>
+				<textarea
+					class="input-text"
+					placeholder="Enter paymentSessionId session_something"
+					rows="4"
+					cols="50"
+					style="resize: none"
+					bind:value={paymentOptions.paymentSessionId}
+				></textarea>
+			</div>
+			{#if !!errorMsg}
+				<div class="text-red-500 text-xs font-semibold">{errorMsg}</div>
+			{/if}
+			<div class="flex justify-end">
+				<button
+					type="button"
+					disabled={!isReadyForPayment || !!!paymentOptions.paymentSessionId}
+					on:click={doPayment}
+					class="mt-0 w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+				>
+					Pay Now
+				</button>
+			</div>
+		</div>
+	</Cashfree.Root>
+</div>
