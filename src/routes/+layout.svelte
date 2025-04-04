@@ -2,6 +2,7 @@
 	import '../app.css';
 	import '../demo.css';
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 	import { paymentSessionIdStore } from './store';
 
 	// State for mobile sidebar toggle
@@ -44,6 +45,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Cashfree PG Svelte</title>
+</svelte:head>
+
 <div class="flex h-screen overflow-hidden bg-gray-100">
 	<!-- Sidebar Backdrop (Mobile) -->
 	{#if sidebarOpen && isMobile}
@@ -62,7 +67,9 @@
 		<!-- Sidebar Header -->
 		<div class="flex items-center justify-between border-b border-indigo-300 p-4">
 			<div class="flex items-center space-x-2">
-				<img src="/pg-svelte.png" alt="" class="w-32" />
+				<a href="{base}/">
+					<img src="/pg-svelte.png" alt="" class="w-32" />
+				</a>
 			</div>
 			<button class="md:hidden" on:click={toggleSidebar}>
 				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,6 +92,12 @@
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>Cards</span>
+					</a>
+					<a
+						href="/upi-qr"
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>UPI</span>
 					</a>
 				</li>
 			</ul>

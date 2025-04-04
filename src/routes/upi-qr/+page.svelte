@@ -37,7 +37,7 @@
 </script>
 
 <div class="flex flex-col gap-y-2 justify-left rounded-lg">
-	<h1 class="text-lg font-bold text-blue-800">Demo of Cards</h1>
+	<h1 class="text-lg font-bold text-blue-800">Demo of UPI Qr Code</h1>
 </div>
 
 <div class="flex flex-row rounded-lg flex-1 gap-x-4 p-4 mt-4 bg-blue-100">
@@ -46,7 +46,7 @@
 			<div class="flex flex-col gap-y-4">
 				<div class="flex flex-col gap-y-1">
 					<label class="text-sm font-medium">Card Number</label>
-					<Cashfree.CardNumber class="input-text" placeholder="4111 1111 1111 1111" />
+					<Cashfree.UPIQRCode size="220px" />
 				</div>
 				<div class="flex flex-col gap-y-1">
 					<label class="text-sm font-medium">Card Holder Name</label>

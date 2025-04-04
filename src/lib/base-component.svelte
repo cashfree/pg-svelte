@@ -28,8 +28,6 @@
 		{
 			eventName: 'change',
 			callback: function () {
-				//console.log('>>>>>>----  base-component:31 ', $status, component.isComplete());
-				//$status.complete = $status.complete && component.isComplete();
 				$components[type] = component;
 			}
 		},

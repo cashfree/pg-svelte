@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
 	import '../demo.css';
 	import * as Cashfree from '$lib';
 	let mode = 'sandbox';
@@ -34,59 +35,37 @@
 	};
 </script>
 
-<div class="flex items-center justify-center bg-blue-100 p-4 rounded-lg">
-	<h1 class="text-xs font-bold text-blue-800">Cashfree Card Component - Svelte</h1>
+<div class="flex flex-col gap-y-2 justify-left p-4 rounded-lg">
+	<h1 class="text-lg font-bold text-blue-800">Welcome to Cashfree Components - Svelte</h1>
+	<h2 class="text-sm font-medium text-gray-400">
+		Build your payment experience with Cashfree Components
+	</h2>
 </div>
 
-<div class="container mx-auto max-w-md mt-10 p-4 shadow-md rounded-md bg-white">
-	<Cashfree.Root bind:this={cashfreeCard} {mode} on:state={checkState}>
-		<div class="flex flex-col gap-y-4">
-			<div class="flex flex-col gap-y-1">
-				<label class="text-sm font-medium">Card Number</label>
-				<Cashfree.CardNumber class="input-text" />
-			</div>
-			<div class="flex flex-col gap-y-1">
-				<label class="text-sm font-medium">Card Holder Name</label>
-				<Cashfree.CardHolder class="input-text" />
-			</div>
-			<div class="grid grid-cols-4 gap-x-2 justify-between">
-				<div class="col-span-2 flex flex-row gap-x-2">
-					<div class="flex flex-col gap-y-1">
-						<label class="text-sm font-medium">Expiry</label>
-						<Cashfree.CardExpiry class="input-text" />
-					</div>
-					<div class="flex flex-col gap-y-1">
-						<label class="text-sm font-medium">CVV</label>
-						<Cashfree.CardCVV class="input-text" />
-					</div>
-				</div>
-			</div>
-			<div class="flex justify-start">
-				<Cashfree.SaveInstrument values={saveText} />
-			</div>
-			<div>
-				<textarea
-					class="input-text"
-					placeholder="Enter paymentSessionId session_something"
-					rows="4"
-					cols="50"
-					style="resize: none"
-					bind:value={paymentOptions.paymentSessionId}
-				></textarea>
-			</div>
-			{#if !!errorMsg}
-				<div class="text-red-500 text-xs font-semibold">{errorMsg}</div>
-			{/if}
-			<div class="flex justify-end">
-				<button
-					type="button"
-					disabled={!isReadyForPayment || !!!paymentOptions.paymentSessionId}
-					on:click={doPayment}
-					class="mt-0 w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-				>
-					Pay Now
-				</button>
-			</div>
-		</div>
-	</Cashfree.Root>
+<div class="container mt-2 px-4">
+	<h3 class="">Here are the list of components available in the Cashfree Components library:</h3>
+	<ol class="space-y-4 mt-4 max-w-2xl text-gray-800 list-none list-inside dark:text-gray-800">
+		<li>
+			<p class="flex flex-row justify-between">
+				<span class="text-lg font-medium text-blue-600 mt-2">Card Component</span>
+				<a href="{base}/cards">
+					<button
+						type="button"
+						class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+					>
+						View Cards Demo
+					</button>
+				</a>
+			</p>
+			<ul class="ps-5 mt-2 space-y-1 list-none">
+				<li><b>&#x3C;Cashfree.CardNumber /&#x3E;</b>: To collect card number from customer</li>
+				<li><b>&#x3C;Cashfree.CardHolder /&#x3E;</b>: To collect card holder name from customer</li>
+				<li><b>&#x3C;Cashfree.CardExpiry /&#x3E;</b>: To collect card expiry date from customer</li>
+				<li><b>&#x3C;Cashfree.CardCVV /&#x3E;</b>: To collect card CVV from customer</li>
+				<li>
+					<b>&#x3C;Cashfree.SaveInstrument /&#x3E;</b>: To collect card save option from customer
+				</li>
+			</ul>
+		</li>
+	</ol>
 </div>
