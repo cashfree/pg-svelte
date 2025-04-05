@@ -7,16 +7,15 @@
 	let mode = 'sandbox';
 
 	let isReadyForPayment = false;
-	function checkState(e) {
-		isReadyForPayment = e.detail.complete;
-	}
-	let cashfreeCard;
+
+	let cashfreeQr;
 	let errorMsg = '';
 
 	async function doPayment(e) {
+		errorMsg = '';
 		paymentOptions.paymentSessionId = $paymentSessionIdStore;
 		try {
-			let res = await cashfreeCard.pay(paymentOptions);
+			let res = await cashfreeQr.pay(paymentOptions);
 			if (!!res.error) {
 				throw new Error(res.error.message);
 			}
@@ -26,14 +25,18 @@
 		}
 	}
 
-	let saveText = {
-		label: 'Save this card for future payments'
-	};
 	let paymentOptions = {
 		redirectTarget: '_self',
 		redirect: 'if_required',
 		offerId: ''
 	};
+	function complete(e) {
+		isReadyForPayment = true;
+	}
+	function ready(e) {
+		isReadyForPayment = true;
+	}
+	let hidePayNow = false;
 </script>
 
 <div class="flex flex-col gap-y-2 justify-left rounded-lg">
@@ -41,37 +44,38 @@
 </div>
 
 <div class="flex flex-row rounded-lg flex-1 gap-x-4 p-4 mt-4 bg-blue-100">
-	<div class="w-2/5 p-4">
-		<Cashfree.Root bind:this={cashfreeCard} {mode} on:state={checkState}>
-			<div class="flex flex-col gap-y-4">
+	<div class="w-full p-4">
+		<Cashfree.Root
+			bind:this={cashfreeQr}
+			{mode}
+			on:complete={complete}
+			on:paymentrequested={(e) => {
+				hidePayNow = true;
+			}}
+			on:ready={ready}
+			class="w-full"
+		>
+			<div class="flex flex-col gap-y-4" let:stateful>
 				<div class="flex flex-col gap-y-1">
-					<label class="text-sm font-medium">Card Number</label>
-					<Cashfree.UPIQRCode size="220px" />
+					<label class="text-sm font-medium text-center">Scan the QR Code</label>
+					<Cashfree.UPIQRCode size="275px" class="mx-auto" />
 				</div>
-				<div class="flex flex-col gap-y-1">
-					<label class="text-sm font-medium">Card Holder Name</label>
-					<Cashfree.CardHolder class="input-text" />
-				</div>
-				<div class="grid grid-cols-4 gap-x-2 justify-between">
-					<div class="col-span-2 flex flex-row gap-x-2">
-						<div class="flex flex-col gap-y-1">
-							<label class="text-sm font-medium">Expiry</label>
-							<Cashfree.CardExpiry class="input-text" />
-						</div>
-						<div class="flex flex-col gap-y-1">
-							<label class="text-sm font-medium">CVV</label>
-							<Cashfree.CardCVV class="input-text" />
-						</div>
-					</div>
-				</div>
-				<div class="flex justify-start">
-					<Cashfree.SaveInstrument values={saveText} />
-				</div>
+
 				{#if !!errorMsg}
 					<div class="text-red-500 text-xs font-semibold">{errorMsg}</div>
 				{/if}
 				<div class="flex justify-end">
 					<button
+						class:hidden={!hidePayNow}
+						type="button"
+						disabled={!isReadyForPayment}
+						on:click={doPayment}
+						class="mt-0 w-full text-white bg-green-700 hover:bg-green-800 disabled:bg-green-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
+					>
+						Regenerate QR
+					</button>
+					<button
+						class:hidden={hidePayNow}
 						type="button"
 						disabled={!isReadyForPayment}
 						on:click={doPayment}
@@ -82,10 +86,5 @@
 				</div>
 			</div>
 		</Cashfree.Root>
-	</div>
-	<div class="w-3/5">
-		<pre
-			style="box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;"
-			class="bg-slate-800 text-white rounded-md p-2 overflow-x-auto overflow-y-auto shadow-lg h-screen">{code}</pre>
 	</div>
 </div>

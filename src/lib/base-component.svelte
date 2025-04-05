@@ -4,63 +4,73 @@
 	import { onMount, onDestroy } from 'svelte';
 	//event dispatcher
 	import { createEventDispatcher } from 'svelte';
+	import events from './events';
+
 	const dispatch = createEventDispatcher();
 
 	// Accept class as a prop
 	export let className = '';
 	export let type;
+
+	let parent;
 	export let values = {};
-	const { mode, cashfree, stylesGlobal, status, components } = getContext(key);
-	export let styles = $stylesGlobal || {};
+	export let styles = {};
+
+	console.log('>>>>>>----  base-component:19 ', styles);
 
 	export { className as class };
 	export let styleList = '';
 	export { styleList as style };
 
 	let element;
-	export let component;
+	export let component; //cashfree component
 
 	let eventsToBubble = [
-		{ eventName: 'ready', callback: void 0 },
-		{ eventName: 'focus', callback: void 0 },
-		{ eventName: 'blur', callback: void 0 },
-		{ eventName: 'invalid', callback: void 0 },
-		{
-			eventName: 'change',
-			callback: function () {
-				$components[type] = component;
-			}
-		},
-		{ eventName: 'empty', callback: void 0 },
-		{ eventName: 'complete', callback: void 0 },
-		{ eventName: 'click', callback: void 0 },
-		{ eventName: 'paymentrequested', callback: void 0 },
-		{ eventName: 'loaderror', callback: void 0 }
+		{ eventName: 'ready' },
+		{ eventName: 'focus' },
+		{ eventName: 'blur' },
+		{ eventName: 'invalid' },
+		{ eventName: 'change' },
+		{ eventName: 'empty' },
+		{ eventName: 'complete' },
+		{ eventName: 'click' },
+		{ eventName: 'paymentrequested' },
+		{ eventName: 'loaderror' }
 	];
 
 	function startEvents() {
+		//do register events
+		events.dispatchCustomEvent(parent, 'register', {
+			componentName: type,
+			componentReference: component
+		});
+
 		for (let i = 0; i < eventsToBubble.length; i++) {
 			const event = eventsToBubble[i];
 			const callback = event.callback;
 
 			component.on(event.eventName, function (d) {
-				if (callback) {
-					component.on(event.eventName, callback);
-				}
-				dispatch(event.eventName, d);
+				events.dispatchCustomEvent(parent, event.eventName, d);
 			});
 		}
 	}
 
 	onMount(() => {
-		component = $cashfree.create(type, {
+		parent = element.closest('[data-cashfree-root]');
+		if (!parent) {
+			throw new Error('Cashfree root not found');
+		}
+		styles = {
+			...parent.styles,
+			...styles
+		};
+		component = parent.cashfree.create(type, {
 			values,
 			style: styles
 		});
 
 		component.mount(element);
 		startEvents();
-		$components[type] = component;
 	});
 	onDestroy(() => {
 		if (component) {

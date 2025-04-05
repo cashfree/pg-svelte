@@ -4,7 +4,23 @@
 
 	export let component;
 	export let placeholder = '4XXX XXXX XXXX 4321';
+	export let hideBrandIcon = false;
 	let { values = {}, ...otherProps } = $$restProps;
+
+	if (!values.placeholder) {
+		values.placeholder = placeholder;
+	}
+	if (
+		!values.hideBrandIcon &&
+		!!hideBrandIcon &&
+		(hideBrandIcon === true || hideBrandIcon === 'true')
+	) {
+		values.hideBrandIcon = true;
+	}
+	const modifiedProps = {
+		...otherProps,
+		values
+	};
 </script>
 
 <BaseComponent
@@ -20,5 +36,5 @@
 	on:click
 	on:paymentrequested
 	on:loaderror
-	{...$$restProps}
+	{...modifiedProps}
 />

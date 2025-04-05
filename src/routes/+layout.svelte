@@ -3,7 +3,9 @@
 	import '../demo.css';
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
-	import { paymentSessionIdStore } from './store';
+	import { page } from '$app/stores';
+	import { paymentSessionIdStore, env } from './store';
+	import { afterNavigate } from '$app/navigation';
 
 	// State for mobile sidebar toggle
 	let sidebarOpen = false;
@@ -11,10 +13,13 @@
 
 	// Define variables you want to share with pages
 	let paymentSessionId = 'payment-session-id';
+	let mode = 'sandbox';
 
 	$: {
 		// Update the context whenever paymentSessionId changes
 		paymentSessionIdStore.set(paymentSessionId);
+		console.log('>>>>>>----  +layout:21 ', mode);
+		env.set(mode);
 	}
 
 	// Make variables available to child pages
@@ -42,6 +47,13 @@
 		return () => {
 			window.removeEventListener('resize', checkScreenSize);
 		};
+	});
+
+	let activeTab = '';
+
+	afterNavigate((e) => {
+		activeTab = e.to.route.id;
+		console.log('>>>>>>----  +layout:53 ', activeTab);
 	});
 </script>
 
@@ -85,19 +97,35 @@
 
 		<!-- Sidebar Links -->
 		<nav class="p-4">
-			<ul class="space-y-2">
+			<ul class="gap-y-3 flex flex-col">
 				<li>
 					<a
 						href="/cards"
+						class:bg-gray-100={activeTab.includes('/cards')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>Cards</span>
 					</a>
 					<a
 						href="/upi-qr"
+						class:bg-gray-100={activeTab.includes('/upi-qr')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
-						<span>UPI</span>
+						<span>UPI QR</span>
+					</a>
+					<a
+						href="/upi-app"
+						class:bg-gray-100={activeTab.includes('/upi-app')}
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>UPI APP</span>
+					</a>
+					<a
+						href="/upi-collect"
+						class:bg-gray-100={activeTab.includes('/upi-collect')}
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>UPI Collect</span>
 					</a>
 				</li>
 			</ul>
@@ -122,8 +150,17 @@
 				</button>
 
 				<!-- Search -->
-				<div class="flex-1 px-4 md:px-8">
-					<div class="relative">
+				<div class="grid grid-cols-6 gap-x-2 px-4 md:px-8">
+					<div class="relative col-span-1">
+						<select
+							bind:value={mode}
+							class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+						>
+							<option value="sandbox">Sandbox</option>
+							<option value="production">Production</option>
+						</select>
+					</div>
+					<div class="relative col-span-5">
 						<input
 							type="text"
 							class="input-text w-full pl-10"

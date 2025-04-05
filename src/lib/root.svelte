@@ -1,5 +1,5 @@
 <script>
-	import { onMount, setContext } from 'svelte';
+	import { onMount, setContext, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { key } from './context-key';
 	import { load } from '@cashfreepayments/cashfree-js';
@@ -9,63 +9,97 @@
 	export let mode = 'sandbox';
 	export let styles = {};
 
-	// Create a writable store for the cashfree instance
-	const cashfreeStore = writable(null);
-	const stylesStore = writable(null);
-	const statusStore = writable({
-		loading: true,
-		error: null,
-		complete: false
-	});
-	const componentsStore = writable(null);
+	let rootEvents = [
+		{ eventName: 'ready' },
+		{ eventName: 'complete' },
+		{ eventName: 'paymentrequested' },
+		{ eventName: 'change' },
+		{ eventName: 'loaderror' }
+	];
 
-	// Set context with the store - only once during initialization
-	setContext(key, {
-		mode,
-		cashfree: cashfreeStore,
-		stylesGlobal: stylesStore,
-		components: componentsStore
-	});
-	let instance = null;
-	onMount(async function () {
-		instance = await load({
-			mode: mode
-		});
-		// Update the store, not the context
-		cashfreeStore.set(instance);
-		stylesStore.set(styles);
-		componentsStore.set({});
-		state.loading = false;
-	});
-
-	let components = {};
-	let state = {
-		complete: false,
-		loading: true
-	};
-
-	componentsStore.subscribe((data) => {
-		components = data;
-		state.complete = true;
-		for (const key in components) {
-			if (components[key].isComplete()) {
-				state.complete = state.complete && true;
-			} else {
-				state.complete = state.complete && false;
+	function dispatchState(e) {
+		for (let i = 0; i < cashfreeComponents.length; i++) {
+			let component = cashfreeComponents[i];
+			let name = component.componentName;
+			let reference = component.componentReference;
+			if (!reference.isComplete()) {
+				dispatch('complete', {
+					isComplete: false,
+					componentName: name
+				});
+				return;
 			}
 		}
-		dispatch('state', state);
+		dispatch('complete', {
+			isComplete: true
+		});
+	}
+
+	onMount(async function () {
+		root.styles = styles;
+		root.cashfree = await load({
+			mode: mode
+		});
+
+		root.addEventListener('register', (e) => {
+			cashfreeComponents.push(e.detail);
+		});
+
+		//add complete event listener, all the component references should be complete
+		root.addEventListener('complete', (e) => {
+			dispatchState(e);
+		});
+		root.addEventListener('change', (e) => {
+			dispatchState(e);
+		});
+		root.addEventListener('click', (e) => {
+			dispatch('click', e);
+		});
+		root.addEventListener('paymentrequested', (e) => {
+			dispatch('paymentrequested', e);
+		});
+		root.addEventListener('loaderror', (e) => {
+			dispatch('loaderror', e);
+		});
 	});
 
-	export function pay(paymentOptions) {
-		paymentOptions.paymentMethod = components.cardNumber;
-		paymentOptions.savePaymentInstrument = components.savePaymentInstrument;
-		return instance.pay(paymentOptions);
+	onDestroy(() => {});
+
+	let payableComponents = ['cardNumber', 'upiQr', 'upiApp', 'upiCollect'];
+
+	function returnPayableComponent() {
+		for (let i = 0; i < cashfreeComponents.length; i++) {
+			let component = cashfreeComponents[i];
+			let name = component.componentName;
+			let reference = component.componentReference;
+			if (payableComponents.includes(name)) {
+				return reference;
+			}
+		}
+		return null;
 	}
+
+	function dispatchError(message) {
+		dispatch('error', new Error(message));
+	}
+
+	export function pay(paymentOptions) {
+		let payableComponent = returnPayableComponent();
+		if (!payableComponent) {
+			throw new Error('No payable component found');
+		}
+		paymentOptions.paymentMethod = payableComponent;
+		// paymentOptions.savePaymentInstrument = components.savePaymentInstrument;
+		return root.cashfree.pay(paymentOptions);
+	}
+
+	let { class: className = '' } = $$props;
+	let root;
+	let cashfreeComponents = [];
 </script>
 
-<div>
-	{#if $cashfreeStore}
+<div class={className} bind:this={root} data-cashfree-root>
+	{#if !!root && !!root.cashfree}
 		<slot></slot>
 	{/if}
 </div>

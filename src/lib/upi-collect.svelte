@@ -1,35 +1,29 @@
 <script>
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
-	import { createEventDispatcher } from 'svelte';
-	const dispatch = createEventDispatcher();
 
 	export let component;
-	export let size = '220px';
-
-	// Extract props we want to modify
+	export let placeholder = 'your upi id';
+	export let upiId = '';
 	let { values = {}, ...otherProps } = $$restProps;
 
-	// Modify the values object
-	if (!values.size) {
-		values.size = size;
+	if (!values.placeholder) {
+		values.placeholder = placeholder;
 	}
 
-	// Create a new props object with our modifications
+	if (!values.upiId) {
+		values.upiId = upiId;
+	}
+
 	const modifiedProps = {
 		...otherProps,
 		values
 	};
-	onMount(() => {
-		// component.on('complete', (event) => {
-		// 	console.log('UPI QR Code complete event:', event);
-		// });
-	});
 </script>
 
 <BaseComponent
 	bind:component
-	type="upiQr"
+	type="upiCollect"
 	on:ready
 	on:focus
 	on:blur

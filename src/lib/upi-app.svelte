@@ -5,14 +5,30 @@
 	const dispatch = createEventDispatcher();
 
 	export let component;
-	export let size = '220px';
+	export let upiApp = '';
+	export let buttonText = '';
+	export let buttonIcon = true;
+	export let size = '2rem';
+
+	let styles = {
+		base: {
+			fontSize: size
+		}
+	};
 
 	// Extract props we want to modify
 	let { values = {}, ...otherProps } = $$restProps;
 
 	// Modify the values object
-	if (!values.size) {
-		values.size = size;
+	if (!values.upiApp) {
+		values.upiApp = upiApp;
+	}
+	if (!values.buttonText) {
+		values.buttonText = buttonText;
+	}
+
+	if (!values.buttonIcon && !!buttonIcon && (buttonIcon === true || buttonIcon === 'true')) {
+		values.buttonIcon = true;
 	}
 
 	// Create a new props object with our modifications
@@ -28,8 +44,9 @@
 </script>
 
 <BaseComponent
+	{styles}
 	bind:component
-	type="upiQr"
+	type="upiApp"
 	on:ready
 	on:focus
 	on:blur

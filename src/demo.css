@@ -57,6 +57,10 @@ body {
 	@apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:shadow-md outline-none transition focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100;
 }
 
-.cf-focus-private {
+.card .cf-focus-private {
 	@apply shadow-md;
+}
+
+.pay-app {
+	@apply flex flex-col;
 }
