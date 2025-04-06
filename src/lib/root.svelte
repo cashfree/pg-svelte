@@ -65,7 +65,7 @@
 
 	onDestroy(() => {});
 
-	let payableComponents = ['cardNumber', 'upiQr', 'upiApp', 'upiCollect'];
+	let payableComponents = ['cardNumber', 'upiQr', 'upiApp', 'upiCollect', 'netbanking', 'wallet'];
 
 	function returnPayableComponent() {
 		for (let i = 0; i < cashfreeComponents.length; i++) {

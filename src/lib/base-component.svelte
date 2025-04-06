@@ -16,8 +16,6 @@
 	export let values = {};
 	export let styles = {};
 
-	console.log('>>>>>>----  base-component:19 ', styles);
-
 	export { className as class };
 	export let styleList = '';
 	export { styleList as style };

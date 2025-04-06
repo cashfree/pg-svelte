@@ -1,9 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
 	import * as Cashfree from '$lib';
+	import NetbankingList from '$lib/netbanking-list';
 	import { paymentSessionIdStore } from '../store';
 	import code from './+page.svelte?raw';
-
 	import { getMode } from '../utils';
 
 	let mode;
@@ -42,41 +42,23 @@
 		offerId: ''
 	};
 
-	let upiApps = [
-		{
-			type: 'gpay',
-			name: 'Google Pay',
+	let netbankingBanks = NetbankingList.map((item) => {
+		return {
+			netbankingBankName: item.netbankingBankName,
+			netbankingBankDisplay: item.netbankingBankDisplay,
 			component: null,
 			selected: false
-		},
-		{
-			type: 'phonepe',
-			name: 'PhonePe',
-			component: null,
-			selected: false
-		},
-		{
-			type: 'paytm',
-			name: 'Paytm',
-			component: null,
-			selected: false
-		},
-		{
-			type: 'bhim',
-			name: 'Bhim',
-			component: null,
-			selected: false
-		}
-	];
+		};
+	});
 
 	let selectedUPIApp = null;
 	function selectUPIAPP(app) {
-		for (let i = 0; i < upiApps.length; i++) {
-			let appx = upiApps[i];
-			if (appx.type === app.type) {
-				upiApps[i].selected = true;
+		for (let i = 0; i < netbankingBanks.length; i++) {
+			let appx = netbankingBanks[i];
+			if (appx.netbankingBankName === app.netbankingBankName) {
+				netbankingBanks[i].selected = true;
 			} else {
-				upiApps[i].selected = false;
+				netbankingBanks[i].selected = false;
 			}
 		}
 		selectedUPIApp = app;
@@ -84,18 +66,18 @@
 </script>
 
 <div class="flex flex-col gap-y-2 justify-left rounded-lg">
-	<h1 class="text-lg font-bold text-blue-800">Demo of UPI Intent - Mobile Only</h1>
+	<h1 class="text-lg font-bold text-blue-800">Demo of Netbanking</h1>
 </div>
 
 <div class="flex flex-row rounded-lg flex-1 gap-x-4 p-4 mt-4 bg-blue-100">
 	{#if !!mode}
 		<div class="w-full flex flex-col gap-y-4 p-2">
-			<div class="flex flex-row gap-2 flex-wrap justify-center">
-				{#each upiApps as app}
+			<div class="flex flex-col gap-2 flex-wrap overflow-auto justify-center max-h-96">
+				{#each netbankingBanks as app}
 					<div
 						class="{app.selected
 							? 'border-2 border-blue-500'
-							: ''} flex flex-col gap-y-2 bg-white w-24 h-24 p-2 text-center justify-center rounded-md shadow-lg"
+							: ''}  bg-white w-96 cursor-pointer h-14 p-2 flex flex-col justify-center rounded-md shadow-lg"
 					>
 						<Cashfree.Root
 							bind:this={app.component}
@@ -103,9 +85,12 @@
 							on:click={() => {
 								selectUPIAPP(app);
 							}}
+							class="flex flex-row gap-x-2 pl-2  justify-start"
 						>
-							<Cashfree.UPIAPP upiApp={app.type} class="mx-auto w-8 h-8" />
-							<label class="text-sm font-medium text-center"> {app.name} </label>
+							<Cashfree.Netbanking netbankingBankName={app.netbankingBankName} class="w-8 h-8" />
+							<label class="text-sm cursor-pointer mt-1.5 font-medium text-center">
+								{app.netbankingBankDisplay}
+							</label>
 						</Cashfree.Root>
 					</div>
 				{/each}
@@ -118,9 +103,9 @@
 					<button
 						type="button"
 						on:click={doPayment}
-						class=" w-56 text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+						class="  text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
 					>
-						Continue with {selectedUPIApp.name}
+						Continue with {selectedUPIApp.netbankingBankDisplay}
 					</button>
 				{/if}
 			</div>

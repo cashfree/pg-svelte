@@ -1,10 +1,11 @@
 <script>
 	import '../app.css';
 	import '../demo.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
 	import { paymentSessionIdStore, env } from './store';
+	import { getMode } from './utils';
 	import { afterNavigate } from '$app/navigation';
 
 	// State for mobile sidebar toggle
@@ -13,13 +14,14 @@
 
 	// Define variables you want to share with pages
 	let paymentSessionId = 'payment-session-id';
-	let mode = 'sandbox';
+
+	//
+
+	let mode;
 
 	$: {
 		// Update the context whenever paymentSessionId changes
 		paymentSessionIdStore.set(paymentSessionId);
-		console.log('>>>>>>----  +layout:21 ', mode);
-		env.set(mode);
 	}
 
 	// Make variables available to child pages
@@ -30,7 +32,7 @@
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
 	}
-
+	let isMounted;
 	// Check screen size on mount and when resized
 	onMount(() => {
 		const checkScreenSize = () => {
@@ -44,17 +46,24 @@
 		// Listen for resize
 		window.addEventListener('resize', checkScreenSize);
 
-		return () => {
-			window.removeEventListener('resize', checkScreenSize);
-		};
+		//from url get mode which is a query param
+		mode = getMode();
 	});
 
 	let activeTab = '';
 
 	afterNavigate((e) => {
 		activeTab = e.to.route.id;
-		console.log('>>>>>>----  +layout:53 ', activeTab);
 	});
+
+	function updateEnv() {
+		//ass
+		mode = mode === 'sandbox' ? 'production' : 'sandbox';
+		//find and replace in the current url query param mode=
+		const url = new URL(window.location.href);
+		url.searchParams.set('mode', mode);
+		location.replace(url);
+	}
 </script>
 
 <svelte:head>
@@ -100,32 +109,46 @@
 			<ul class="gap-y-3 flex flex-col">
 				<li>
 					<a
-						href="/cards"
+						href="/cards?mode={mode}"
 						class:bg-gray-100={activeTab.includes('/cards')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>Cards</span>
 					</a>
 					<a
-						href="/upi-qr"
+						href="/upi-qr?mode={mode}"
 						class:bg-gray-100={activeTab.includes('/upi-qr')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>UPI QR</span>
 					</a>
 					<a
-						href="/upi-app"
+						href="/upi-app?mode={mode}"
 						class:bg-gray-100={activeTab.includes('/upi-app')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>UPI APP</span>
 					</a>
 					<a
-						href="/upi-collect"
+						href="/upi-collect?mode={mode}"
 						class:bg-gray-100={activeTab.includes('/upi-collect')}
 						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
 					>
 						<span>UPI Collect</span>
+					</a>
+					<a
+						href="/netbanking?mode={mode}"
+						class:bg-gray-100={activeTab.includes('/netbanking')}
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>Netbanking</span>
+					</a>
+					<a
+						href="/wallets?mode={mode}"
+						class:bg-gray-100={activeTab.includes('/wallets')}
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>Wallets</span>
 					</a>
 				</li>
 			</ul>
@@ -153,6 +176,7 @@
 				<div class="grid grid-cols-6 gap-x-2 px-4 md:px-8">
 					<div class="relative col-span-1">
 						<select
+							on:change={updateEnv}
 							bind:value={mode}
 							class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
 						>

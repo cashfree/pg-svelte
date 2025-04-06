@@ -4,7 +4,13 @@
 	import { paymentSessionIdStore } from '../store';
 	import code from './+page.svelte?raw';
 
-	let mode = 'sandbox';
+	import { getMode } from '../utils';
+
+	let mode;
+
+	onMount(() => {
+		mode = getMode();
+	});
 
 	let isReadyForPayment = false;
 
@@ -43,48 +49,50 @@
 	<h1 class="text-lg font-bold text-blue-800">Demo of UPI Qr Code</h1>
 </div>
 
-<div class="flex flex-row rounded-lg flex-1 gap-x-4 p-4 mt-4 bg-blue-100">
-	<div class="w-full p-4">
-		<Cashfree.Root
-			bind:this={cashfreeQr}
-			{mode}
-			on:complete={complete}
-			on:paymentrequested={(e) => {
-				hidePayNow = true;
-			}}
-			on:ready={ready}
-			class="w-full"
-		>
-			<div class="flex flex-col gap-y-4" let:stateful>
-				<div class="flex flex-col gap-y-1">
-					<label class="text-sm font-medium text-center">Scan the QR Code</label>
-					<Cashfree.UPIQRCode size="275px" class="mx-auto" />
-				</div>
+<div class="flex flex-row rounded-lg flex-1 gap-x-4 w-[340px] p-4 mt-4 bg-blue-100">
+	{#if !!mode}
+		<div class=" p-4">
+			<Cashfree.Root
+				bind:this={cashfreeQr}
+				{mode}
+				on:complete={complete}
+				on:paymentrequested={(e) => {
+					hidePayNow = true;
+				}}
+				on:ready={ready}
+				class="w-full"
+			>
+				<div class="flex flex-col gap-y-4" let:stateful>
+					<div class="flex flex-col gap-y-1">
+						<label class="text-sm font-medium text-center">Scan the QR Code</label>
+						<Cashfree.UPIQRCode size="275px" class="mx-auto" />
+					</div>
 
-				{#if !!errorMsg}
-					<div class="text-red-500 text-xs font-semibold">{errorMsg}</div>
-				{/if}
-				<div class="flex justify-end">
-					<button
-						class:hidden={!hidePayNow}
-						type="button"
-						disabled={!isReadyForPayment}
-						on:click={doPayment}
-						class="mt-0 w-full text-white bg-green-700 hover:bg-green-800 disabled:bg-green-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
-					>
-						Regenerate QR
-					</button>
-					<button
-						class:hidden={hidePayNow}
-						type="button"
-						disabled={!isReadyForPayment}
-						on:click={doPayment}
-						class="mt-0 w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-					>
-						Pay Now
-					</button>
+					{#if !!errorMsg}
+						<div class="text-red-500 text-xs font-semibold">{errorMsg}</div>
+					{/if}
+					<div class="flex justify-end">
+						<button
+							class:hidden={!hidePayNow}
+							type="button"
+							disabled={!isReadyForPayment}
+							on:click={doPayment}
+							class="mt-0 w-full text-white bg-green-700 hover:bg-green-800 disabled:bg-green-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
+						>
+							Regenerate QR
+						</button>
+						<button
+							class:hidden={hidePayNow}
+							type="button"
+							disabled={!isReadyForPayment}
+							on:click={doPayment}
+							class="mt-0 w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-not-allowed disabled:opacity-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+						>
+							Pay Now
+						</button>
+					</div>
 				</div>
-			</div>
-		</Cashfree.Root>
-	</div>
+			</Cashfree.Root>
+		</div>
+	{/if}
 </div>
