@@ -1,3 +1,46 @@
+# Cashfree Payments for Svelte
+
+A Svelte component library for integrating Cashfree Payment Gateway in your Svelte applications.
+
+## Quick Start Guide
+
+1. **Install the package**
+
+   ```bash
+   npm install @cashfreepayments/pg-svelte
+   ```
+
+2. **Import and set up the Root component**
+
+   ```svelte
+   <script>
+   	import * as Cashfree from '@cashfreepayments/pg-svelte';
+
+   	let cashfreeComponent;
+   	let mode = 'sandbox';
+   	let paymentSessionId = 'your-payment-session-id'; // Get this from your backend
+
+   	async function handlePayment() {
+   		const result = await cashfreeComponent.pay({
+   			paymentSessionId,
+   			redirectTarget: '_self'
+   		});
+
+   		if (result.success) {
+   			console.log('Payment successful!', result);
+   		}
+   	}
+   </script>
+
+   <Cashfree.Root bind:this={cashfreeComponent} {mode}>
+   	<!-- Add payment component here -->
+   	<Cashfree.CardNumber class="input" placeholder="Card number" />
+   	<button on:click={handlePayment}>Pay Now</button>
+   </Cashfree.Root>
+   ```
+
+3. **Run your app** and test the integration!
+
 ## Table of Contents
 
 1. Installation
@@ -26,7 +69,7 @@ The first step is to import the Cashfree components and set up a `Root` componen
 
 ```svelte
 <script>
-	import * as Cashfree from '$lib';
+	import * as Cashfree from '@cashfreepayments/pg-svelte';
 	import { onMount } from 'svelte';
 
 	let mode = 'sandbox'; // or 'production' for live payments
@@ -65,6 +108,16 @@ The first step is to import the Cashfree components and set up a `Root` componen
 Card payment requires four components: CardNumber, CardHolder, CardExpiry, and CardCVV. Optionally, you can include SaveInstrument to let users save their card.
 
 ```svelte
+<script>
+	// Track payment component state
+	let isReadyForPayment = false;
+
+	function checkState(e) {
+		// Check if all required fields are complete
+		isReadyForPayment = e.detail.isComplete;
+	}
+</script>
+
 <Cashfree.Root bind:this={cashfreeCard} {mode} on:complete={checkState}>
 	<div class="form-container">
 		<div>
@@ -98,6 +151,22 @@ Card payment requires four components: CardNumber, CardHolder, CardExpiry, and C
 Display a QR code that customers can scan with any UPI-enabled app.
 
 ```svelte
+<script>
+	let isReadyForPayment = false;
+
+	function ready(e) {
+		console.log('Component ready');
+	}
+
+	function complete(e) {
+		isReadyForPayment = e.detail.isComplete;
+	}
+
+	function handlePaymentRequested(e) {
+		console.log('Payment requested', e.detail);
+	}
+</script>
+
 <Cashfree.Root
 	bind:this={cashfreeQr}
 	{mode}
@@ -118,6 +187,29 @@ Display a QR code that customers can scan with any UPI-enabled app.
 Show UPI app icons for mobile users to select their preferred UPI app.
 
 ```svelte
+<script>
+	// Define available UPI apps
+	let upiApps = [
+		{ type: 'gpay', name: 'Google Pay', component: null, selected: false },
+		{ type: 'phonepe', name: 'PhonePe', component: null, selected: false },
+		{ type: 'paytm', name: 'Paytm', component: null, selected: false }
+	];
+
+	let selectedUPIApp = null;
+
+	function selectUPIApp(app) {
+		// Clear previous selections
+		upiApps.forEach((a) => {
+			a.selected = false;
+		});
+
+		// Set new selection
+		app.selected = true;
+		selectedUPIApp = app;
+		upiApps = [...upiApps]; // Trigger reactivity
+	}
+</script>
+
 <div class="upi-apps-container">
 	{#each upiApps as app}
 		<div class={app.selected ? 'selected-app' : 'app'}>
@@ -139,6 +231,14 @@ Show UPI app icons for mobile users to select their preferred UPI app.
 Allow customers to enter their UPI ID for direct payment collection.
 
 ```svelte
+<script>
+	let isReadyForPayment = false;
+
+	function checkState(e) {
+		isReadyForPayment = e.detail.isComplete;
+	}
+</script>
+
 <Cashfree.Root bind:this={cashfreeUPICollect} {mode} on:complete={checkState}>
 	<div>
 		<label>UPI ID</label>
@@ -153,6 +253,31 @@ Allow customers to enter their UPI ID for direct payment collection.
 Display a list of banks for netbanking payment.
 
 ```svelte
+<script>
+	import { netbankingBanksList } from '@cashfreepayments/pg-svelte';
+
+	// Import bank list or define your own
+	let netbankingBanks = netbankingBanksList.map((bank) => ({
+		...bank,
+		component: null,
+		selected: false
+	}));
+
+	let selectedBank = null;
+
+	function selectBank(bank) {
+		// Clear previous selection
+		netbankingBanks.forEach((b) => {
+			b.selected = false;
+		});
+
+		// Set new selection
+		bank.selected = true;
+		selectedBank = bank;
+		netbankingBanks = [...netbankingBanks]; // Trigger reactivity
+	}
+</script>
+
 <div class="netbanking-container">
 	{#each netbankingBanks as bank}
 		<div class={bank.selected ? 'selected-bank' : 'bank'}>
@@ -174,6 +299,35 @@ Display a list of banks for netbanking payment.
 Implement wallet payment options with phone number input.
 
 ```svelte
+<script>
+	// Define available wallet providers
+	let walletProviders = [
+		{ provider: 'amazonpay', buttonText: 'Amazon Pay', component: null, selected: false },
+		{ provider: 'phonepe', buttonText: 'PhonePe', component: null, selected: false },
+		{ provider: 'paytm', buttonText: 'Paytm', component: null, selected: false }
+	];
+
+	let phone = '';
+	let selectedWallet = null;
+
+	function selectWallet(wallet) {
+		if (!phone) {
+			alert('Please enter phone number first');
+			return;
+		}
+
+		// Clear previous selection
+		walletProviders.forEach((w) => {
+			w.selected = false;
+		});
+
+		// Set new selection
+		wallet.selected = true;
+		selectedWallet = wallet;
+		walletProviders = [...walletProviders]; // Trigger reactivity
+	}
+</script>
+
 <div>
 	<label for="phone">Enter Phone number</label>
 	<input type="text" bind:value={phone} class="input-text" id="phone" />
@@ -201,6 +355,8 @@ Cashfree components emit various events you can listen to:
 
 ```svelte
 <script>
+	let isReadyForPayment = false;
+
 	function handleComplete(e) {
 		// e.detail contains information about the state
 		// For example, e.detail.isComplete indicates if all required fields are filled
@@ -215,6 +371,16 @@ Cashfree components emit various events you can listen to:
 	function handleReady(e) {
 		// Component is ready to accept input
 		console.log('Component ready');
+	}
+
+	function handleChange(e) {
+		// Field value has changed
+		console.log('Value changed', e.detail);
+	}
+
+	function handleLoadError(e) {
+		// Handle any loading errors
+		console.error('Load error', e.detail);
 	}
 </script>
 
