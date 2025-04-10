@@ -52,16 +52,32 @@
 			});
 		}
 	}
-
+	function merge2Levels(obj1, obj2) {
+		const result = { ...obj1 };
+		for (const key in obj2) {
+			if (obj2.hasOwnProperty(key)) {
+				if (
+					typeof obj2[key] === 'object' &&
+					obj2[key] !== null &&
+					result.hasOwnProperty(key) &&
+					typeof result[key] === 'object' &&
+					result[key] !== null
+				) {
+					result[key] = { ...result[key], ...obj2[key] };
+				} else {
+					result[key] = obj2[key];
+				}
+			}
+		}
+		return result;
+	}
 	onMount(() => {
 		parent = element.closest('[data-cashfree-root]');
 		if (!parent) {
 			throw new Error('Cashfree root not found');
 		}
-		styles = {
-			...parent.styles,
-			...styles
-		};
+
+		styles = merge2Levels(parent.styles, styles);
 		component = parent.cashfree.create(type, {
 			values,
 			style: styles
