@@ -252,9 +252,9 @@ Allow customers to enter their UPI ID for direct payment collection.
 
 Display a list of banks for netbanking payment.
 
-```svelte
+```js
 <script>
-	import { netbankingBanksList } from '@cashfreepayments/pg-svelte';
+	import netbankingBanksList from '@cashfreepayments/pg-svelte/netbanking-list';
 
 	// Import bank list or define your own
 	let netbankingBanks = netbankingBanksList.map((bank) => ({
