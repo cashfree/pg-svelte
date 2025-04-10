@@ -12,32 +12,32 @@ A Svelte component library for integrating Cashfree Payment Gateway in your Svel
 
 2. **Import and set up the Root component**
 
-   ```svelte
-   <script>
-   	import * as Cashfree from '@cashfreepayments/pg-svelte';
+```svelte
+<script>
+	import * as Cashfree from '@cashfreepayments/pg-svelte';
 
-   	let cashfreeComponent;
-   	let mode = 'sandbox';
-   	let paymentSessionId = 'your-payment-session-id'; // Get this from your backend
+	let cashfreeComponent;
+	let mode = 'sandbox';
+	let paymentSessionId = 'your-payment-session-id'; // Get this from your backend
 
-   	async function handlePayment() {
-   		const result = await cashfreeComponent.pay({
-   			paymentSessionId,
-   			redirectTarget: '_self'
-   		});
+	async function handlePayment() {
+		const result = await cashfreeComponent.pay({
+			paymentSessionId,
+			redirectTarget: '_self'
+		});
 
-   		if (result.success) {
-   			console.log('Payment successful!', result);
-   		}
-   	}
-   </script>
+		if (result.success) {
+			console.log('Payment successful!', result);
+		}
+	}
+</script>
 
-   <Cashfree.Root bind:this={cashfreeComponent} {mode}>
-   	<!-- Add payment component here -->
-   	<Cashfree.CardNumber class="input" placeholder="Card number" />
-   	<button on:click={handlePayment}>Pay Now</button>
-   </Cashfree.Root>
-   ```
+<Cashfree.Root bind:this={cashfreeComponent} {mode}>
+	<!-- Add payment component here -->
+	<Cashfree.CardNumber class="input" placeholder="Card number" />
+	<button on:click={handlePayment}>Pay Now</button>
+</Cashfree.Root>
+```
 
 3. **Run your app** and test the integration!
 
