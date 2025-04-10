@@ -404,16 +404,38 @@ You can style components using Tailwind classes or custom CSS:
 ```svelte
 <script>
 	const customStyles = {
-		base: {
-			fontSize: '16px',
-			color: '#333',
-			'::placeholder': {
-				color: '#999'
+		classes: {
+			base: 'my-input',
+			focus: 'input-focused',
+			invalid: 'input-error',
+			complete: 'input-complete'
+		},
+		fonts: [
+			{
+				family: 'Roboto',
+				src: 'https://fonts.googleapis.com/css2?family=Roboto'
+			}
+		],
+		style: {
+			base: {
+				color: '#333',
+				fontSize: '16px',
+				fontFamily: 'Roboto, sans-serif',
+				padding: '12px',
+				backgroundColor: '#fff',
+				border: '1px solid #ccc',
+				borderRadius: '4px'
+			},
+			focus: {
+				borderColor: '#0066cc'
+			},
+			invalid: {
+				borderColor: '#ff3333',
+				color: '#ff3333'
 			}
 		},
-		focus: {
-			border: '1px solid #4f46e5'
-		}
+		disabled: false,
+		loader: true
 	};
 </script>
 
