@@ -1,30 +1,37 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Cashfree from '$lib';
+	// @ts-ignore
+	import * as CashfreeModule from '$lib';
+	// @ts-ignore
 	import NetbankingList from '$lib/netbanking-list';
-	import { paymentSessionIdStore } from '../store';
-	import code from './+page.svelte?raw';
-	import { getMode } from '../utils';
+	import { paymentSessionIdStore } from '../store.js';
+	// Import with ?raw currently causing TypeScript errors, comment for now
+	// import code from './+page.svelte?raw';
+	import { getMode } from '../utils.js';
 
-	let mode;
+	let mode: 'sandbox' | 'production';
 
 	onMount(() => {
-		mode = getMode();
+		mode = getMode() as 'sandbox' | 'production';
 	});
 
 	let isReadyForPayment = false;
 
 	let errorMsg = '';
 
-	async function doPayment(e) {
+	async function doPayment(e: Event) {
 		errorMsg = '';
 		paymentOptions.paymentSessionId = $paymentSessionIdStore;
 		try {
-			let res = await selectedWallet.component.pay(paymentOptions);
-			if (!!res.error) {
-				throw new Error(res.error.message);
+			if (!!selectedWallet && selectedWallet.component) {
+				let res = await selectedWallet.component.pay(paymentOptions);
+				if (!!res.error) {
+					throw new Error(res.error.message);
+				}
+			} else {
+				throw new Error('Please select a payment method');
 			}
-		} catch (error) {
+		} catch (error: any) {
 			errorMsg = error.message;
 			console.error('Payment failed:', error);
 		}
@@ -36,7 +43,7 @@
 		}
 	};
 
-	let paymentOptions = {
+	let paymentOptions: Record<string, any> = {
 		redirectTarget: '_self',
 		redirect: 'if_required',
 		offerId: ''
@@ -44,7 +51,15 @@
 
 	let phone = '8474090589';
 
-	let walletProviders = [
+	interface WalletProvider {
+		provider: string;
+		buttonText: string;
+		buttonIcon: boolean;
+		selected: boolean;
+		component: any;
+	}
+
+	let walletProviders: WalletProvider[] = [
 		{
 			provider: 'phonepe',
 			buttonText: 'PhonePe',
@@ -103,8 +118,8 @@
 		}
 	];
 
-	let selectedWallet = null;
-	function selectWallet(app) {
+	let selectedWallet: WalletProvider | null = null;
+	function selectWallet(app: WalletProvider) {
 		for (let i = 0; i < walletProviders.length; i++) {
 			let appx = walletProviders[i];
 			if (appx.provider === app.provider) {
@@ -135,7 +150,7 @@
 							? 'border-2 border-blue-500'
 							: ''}  bg-white w-48 cursor-pointer h-14 p-2 flex flex-col justify-center rounded-md shadow-lg"
 					>
-						<Cashfree.Root
+						<CashfreeModule.Cashfree
 							bind:this={wallet.component}
 							{mode}
 							on:click={() => {
@@ -143,11 +158,14 @@
 							}}
 							class="flex flex-row gap-x-2 pl-2  justify-start"
 						>
-							<Cashfree.Wallet provider={wallet.provider} {phone} class="w-8 h-8" />
-							<label class="text-sm cursor-pointer mt-1.5 font-medium text-center">
+							<CashfreeModule.Wallet provider={wallet.provider} {phone} class="w-8 h-8" />
+							<span
+								id="wallet-{wallet.provider}"
+								class="text-sm cursor-pointer mt-1.5 font-medium text-center"
+							>
 								{wallet.buttonText}
-							</label>
-						</Cashfree.Root>
+							</span>
+						</CashfreeModule.Cashfree>
 					</div>
 				{/each}
 			</div>
@@ -168,3 +186,9 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	:global(.input-text) {
+		@apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:shadow-md outline-none transition focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100;
+	}
+</style>

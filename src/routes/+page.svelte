@@ -1,34 +1,36 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import '../demo.css';
+	// @ts-ignore
 	import * as Cashfree from '$lib';
-	let mode = 'sandbox';
-
+	let mode: 'sandbox' | 'production' = 'sandbox';
 	let isReadyForPayment = false;
-	function checkState(e) {
+
+	function checkState(e: CustomEvent<any>) {
 		isReadyForPayment = e.detail.complete;
 	}
-	let cashfreeCard;
+
+	let cashfreeCard: any;
 	let errorMsg = '';
 
-	async function doPayment(e) {
+	async function doPayment(e: Event) {
 		try {
-			let res = await cashfreeCard.pay(paymentOptions);
-			if (!!res.error) {
-				throw new Error(res.error.message);
+			if (cashfreeCard) {
+				let res = await cashfreeCard.pay(paymentOptions);
+				if (!!res.error) {
+					throw new Error(res.error.message);
+				}
+			} else {
+				throw new Error('Payment component not initialized');
 			}
-		} catch (error) {
+		} catch (error: any) {
 			errorMsg = error.message;
 			console.error('Payment failed:', error);
 		}
 	}
 
-	let saveText = {
-		label: 'Save this card for future payments'
-	};
-	let paymentOptions = {
-		paymentSessionId: '',
+	let paymentOptions: Record<string, any> = {
 		redirectTarget: '_self',
 		redirect: 'if_required',
 		offerId: ''

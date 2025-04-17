@@ -1,11 +1,8 @@
-<script>
+<script lang="ts">
 	import BaseComponent from './base-component.svelte';
 
-	// If you need to export any specific props or modify them before passing them down
-	// export let specificProp = defaultValue;
-
 	// Any props not explicitly defined above will be available in $$restProps
-	export let component;
+	export let component: any;
 </script>
 
 <BaseComponent

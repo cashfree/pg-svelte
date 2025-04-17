@@ -10,34 +10,52 @@ A Svelte component library for integrating Cashfree Payment Gateway in your Svel
    npm install @cashfreepayments/pg-svelte
    ```
 
-2. **Import and set up the Root component**
+2. **Import and set up the Cashfree component**
 
 ```svelte
 <script>
-	import * as Cashfree from '@cashfreepayments/pg-svelte';
+	import { Cashfree, CardNumber } from '@cashfreepayments/pg-svelte';
 
 	let cashfreeComponent;
 	let mode = 'sandbox';
 	let paymentSessionId = 'your-payment-session-id'; // Get this from your backend
+	let isReadyForPayment = false;
+
+	function checkState(e) {
+		isReadyForPayment = e.detail.isComplete;
+	}
 
 	async function handlePayment() {
 		const result = await cashfreeComponent.pay({
-			paymentSessionId,
-			redirectTarget: '_self'
+			paymentSessionId
 		});
 
-		if (result.success) {
-			console.log('Payment successful!', result);
+		if (result.error) {
+			//there is an error
+			//message at result.error.message
+		}
+		if (result.redirect) {
+			//console.log("User would be redirected");
+		}
+		if (result.paymentDetails) {
+			//only when redirect = 'if_required' for UPI payment
+			//payment is successful
+			//message is at result.paymentDetails.paymentMessage
 		}
 	}
 </script>
 
-<Cashfree.Root bind:this={cashfreeComponent} {mode}>
+<Cashfree bind:this={cashfreeComponent} {mode} on:complete={checkState}>
 	<!-- Add payment component here -->
-	<Cashfree.CardNumber class="input" placeholder="Card number" />
-	<button on:click={handlePayment}>Pay Now</button>
-</Cashfree.Root>
+	<CardNumber class="input" placeholder="Card number" />
+	<CardHolder id="card-holder" class="input" />
+	<CardExpiry id="card-expiry" class="input" />
+	<CardCVV id="card-cvv" class="input" />
+	<button disabled={!isReadyForPayment} on:click={handlePayment}>Pay Now</button>
+</Cashfree>
 ```
+
+There are lot of other configurations that you can use. You can read them [here](https://www.cashfree.com/docs/payments/online/element/payment-options)
 
 3. **Run your app** and test the integration!
 
@@ -65,11 +83,11 @@ npm install @cashfreepayments/pg-svelte
 
 ## Basic Setup
 
-The first step is to import the Cashfree components and set up a `Root` component that will host your payment method.
+The first step is to import the Cashfree components and set up a `Cashfree` component that will host your payment method.
 
 ```svelte
 <script>
-	import * as Cashfree from '@cashfreepayments/pg-svelte';
+	import { Cashfree } from '@cashfreepayments/pg-svelte';
 	import { onMount } from 'svelte';
 
 	let mode = 'sandbox'; // or 'production' for live payments
@@ -96,9 +114,9 @@ The first step is to import the Cashfree components and set up a `Root` componen
 	}
 </script>
 
-<Cashfree.Root bind:this={cashfreeComponent} {mode}>
+<Cashfree bind:this={cashfreeComponent} {mode}>
 	<!-- Payment components go here -->
-</Cashfree.Root>
+</Cashfree>
 ```
 
 ## Payment Methods
@@ -109,6 +127,15 @@ Card payment requires four components: CardNumber, CardHolder, CardExpiry, and C
 
 ```svelte
 <script>
+	import {
+		Cashfree,
+		CardNumber,
+		CardHolder,
+		CardExpiry,
+		CardCVV,
+		SaveInstrument
+	} from '@cashfreepayments/pg-svelte';
+
 	// Track payment component state
 	let isReadyForPayment = false;
 
@@ -118,32 +145,32 @@ Card payment requires four components: CardNumber, CardHolder, CardExpiry, and C
 	}
 </script>
 
-<Cashfree.Root bind:this={cashfreeCard} {mode} on:complete={checkState}>
+<Cashfree bind:this={cashfreeCard} {mode} on:complete={checkState}>
 	<div class="form-container">
 		<div>
 			<label>Card Number</label>
-			<Cashfree.CardNumber class="input-text" placeholder="4111 XXXX XXXX 1111" />
+			<CardNumber class="input-text" placeholder="4111 XXXX XXXX 1111" />
 		</div>
 		<div>
 			<label>Card Holder Name</label>
-			<Cashfree.CardHolder class="input-text" />
+			<CardHolder class="input-text" />
 		</div>
 		<div class="expiry-cvv-container">
 			<div>
 				<label>Expiry</label>
-				<Cashfree.CardExpiry class="input-text" />
+				<CardExpiry class="input-text" />
 			</div>
 			<div>
 				<label>CVV</label>
-				<Cashfree.CardCVV class="input-text" />
+				<CardCVV class="input-text" />
 			</div>
 		</div>
 		<div>
-			<Cashfree.SaveInstrument label="Save this card for future payments" />
+			<SaveInstrument label="Save this card for future payments" />
 		</div>
 		<button on:click={doPayment} disabled={!isReadyForPayment}>Pay Now</button>
 	</div>
-</Cashfree.Root>
+</Cashfree>
 ```
 
 ### UPI QR Code
@@ -152,6 +179,8 @@ Display a QR code that customers can scan with any UPI-enabled app.
 
 ```svelte
 <script>
+	import { Cashfree, UPIQRCode } from '@cashfreepayments/pg-svelte';
+
 	let isReadyForPayment = false;
 
 	function ready(e) {
@@ -167,7 +196,7 @@ Display a QR code that customers can scan with any UPI-enabled app.
 	}
 </script>
 
-<Cashfree.Root
+<Cashfree
 	bind:this={cashfreeQr}
 	{mode}
 	on:complete={complete}
@@ -176,10 +205,10 @@ Display a QR code that customers can scan with any UPI-enabled app.
 >
 	<div>
 		<label>Scan the QR Code</label>
-		<Cashfree.UPIQRCode size="275px" class="qr-code" />
+		<UPIQRCode size="275px" class="qr-code" />
 		<button on:click={doPayment} disabled={!isReadyForPayment}>Pay Now</button>
 	</div>
-</Cashfree.Root>
+</Cashfree>
 ```
 
 ### UPI App Intent
@@ -188,6 +217,8 @@ Show UPI app icons for mobile users to select their preferred UPI app.
 
 ```svelte
 <script>
+	import { Cashfree, UPIAPP } from '@cashfreepayments/pg-svelte';
+
 	// Define available UPI apps
 	let upiApps = [
 		{ type: 'gpay', name: 'Google Pay', component: null, selected: false },
@@ -213,10 +244,10 @@ Show UPI app icons for mobile users to select their preferred UPI app.
 <div class="upi-apps-container">
 	{#each upiApps as app}
 		<div class={app.selected ? 'selected-app' : 'app'}>
-			<Cashfree.Root bind:this={app.component} {mode} on:click={() => selectUPIApp(app)}>
-				<Cashfree.UPIAPP upiApp={app.type} class="app-icon" />
+			<Cashfree bind:this={app.component} {mode} on:click={() => selectUPIApp(app)}>
+				<UPIAPP upiApp={app.type} class="app-icon" />
 				<label>{app.name}</label>
-			</Cashfree.Root>
+			</Cashfree>
 		</div>
 	{/each}
 </div>
@@ -232,6 +263,8 @@ Allow customers to enter their UPI ID for direct payment collection.
 
 ```svelte
 <script>
+	import { Cashfree, UPICollect } from '@cashfreepayments/pg-svelte';
+
 	let isReadyForPayment = false;
 
 	function checkState(e) {
@@ -239,13 +272,13 @@ Allow customers to enter their UPI ID for direct payment collection.
 	}
 </script>
 
-<Cashfree.Root bind:this={cashfreeUPICollect} {mode} on:complete={checkState}>
+<Cashfree bind:this={cashfreeUPICollect} {mode} on:complete={checkState}>
 	<div>
 		<label>UPI ID</label>
-		<Cashfree.UPICollect class="input-text" placeholder="yourname@upi" />
+		<UPICollect class="input-text" placeholder="yourname@upi" />
 		<button on:click={doPayment} disabled={!isReadyForPayment}>Pay Now</button>
 	</div>
-</Cashfree.Root>
+</Cashfree>
 ```
 
 ### Netbanking
@@ -254,6 +287,7 @@ Display a list of banks for netbanking payment.
 
 ```svelte
 <script>
+	import { Cashfree, Netbanking } from '@cashfreepayments/pg-svelte';
 	import netbankingBanksList from '@cashfreepayments/pg-svelte/netbanking-list';
 
 	// Import bank list or define your own
@@ -281,10 +315,10 @@ Display a list of banks for netbanking payment.
 <div class="netbanking-container">
 	{#each netbankingBanks as bank}
 		<div class={bank.selected ? 'selected-bank' : 'bank'}>
-			<Cashfree.Root bind:this={bank.component} {mode} on:click={() => selectBank(bank)}>
-				<Cashfree.Netbanking netbankingBankName={bank.netbankingBankName} class="bank-icon" />
+			<Cashfree bind:this={bank.component} {mode} on:click={() => selectBank(bank)}>
+				<Netbanking netbankingBankName={bank.netbankingBankName} class="bank-icon" />
 				<label>{bank.netbankingBankDisplay}</label>
-			</Cashfree.Root>
+			</Cashfree>
 		</div>
 	{/each}
 </div>
@@ -300,6 +334,8 @@ Implement wallet payment options with phone number input.
 
 ```svelte
 <script>
+	import { Cashfree, Wallet } from '@cashfreepayments/pg-svelte';
+
 	// Define available wallet providers
 	let walletProviders = [
 		{ provider: 'amazonpay', buttonText: 'Amazon Pay', component: null, selected: false },
@@ -336,10 +372,10 @@ Implement wallet payment options with phone number input.
 <div class="wallets-container">
 	{#each walletProviders as wallet}
 		<div class={wallet.selected ? 'selected-wallet' : 'wallet'}>
-			<Cashfree.Root bind:this={wallet.component} {mode} on:click={() => selectWallet(wallet)}>
-				<Cashfree.Wallet provider={wallet.provider} {phone} class="wallet-icon" />
+			<Cashfree bind:this={wallet.component} {mode} on:click={() => selectWallet(wallet)}>
+				<Wallet provider={wallet.provider} {phone} class="wallet-icon" />
 				<label>{wallet.buttonText}</label>
-			</Cashfree.Root>
+			</Cashfree>
 		</div>
 	{/each}
 </div>
@@ -355,6 +391,8 @@ Cashfree components emit various events you can listen to:
 
 ```svelte
 <script>
+	import { Cashfree } from '@cashfreepayments/pg-svelte';
+
 	let isReadyForPayment = false;
 
 	function handleComplete(e) {
@@ -384,7 +422,7 @@ Cashfree components emit various events you can listen to:
 	}
 </script>
 
-<Cashfree.Root
+<Cashfree
 	bind:this={component}
 	{mode}
 	on:ready={handleReady}
@@ -394,7 +432,7 @@ Cashfree components emit various events you can listen to:
 	on:loaderror={handleLoadError}
 >
 	<!-- Components -->
-</Cashfree.Root>
+</Cashfree>
 ```
 
 ## Styling Components
@@ -403,6 +441,8 @@ You can style components using Tailwind classes or custom CSS:
 
 ```svelte
 <script>
+	import { Cashfree, CardNumber } from '@cashfreepayments/pg-svelte';
+
 	const customStyles = {
 		classes: {
 			base: 'my-input',
@@ -440,12 +480,12 @@ You can style components using Tailwind classes or custom CSS:
 </script>
 
 <!-- Using Tailwind classes -->
-<Cashfree.CardNumber class="w-full rounded-md border border-gray-300 px-3 py-2" />
+<CardNumber class="w-full rounded-md border border-gray-300 px-3 py-2" />
 
 <!-- Using custom styles -->
-<Cashfree.Root {mode} styles={customStyles}>
-	<Cashfree.CardNumber class="custom-input" />
-</Cashfree.Root>
+<Cashfree {mode} styles={customStyles}>
+	<CardNumber class="custom-input" />
+</Cashfree>
 
 <style>
 	.custom-input {

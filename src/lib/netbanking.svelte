@@ -1,16 +1,17 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 	import { createEventDispatcher } from 'svelte';
+
 	const dispatch = createEventDispatcher();
 
-	export let component;
+	export let component: any;
 	export let netbankingBankName = '';
 	export let buttonText = '';
 	export let buttonIcon = true;
 	export let size = '2rem';
 
-	let styles = {
+	let styles: Record<string, any> = {
 		base: {
 			fontSize: size
 		}

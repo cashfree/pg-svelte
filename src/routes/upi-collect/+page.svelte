@@ -1,56 +1,61 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Cashfree from '$lib';
-	import { paymentSessionIdStore } from '../store';
-	import code from './+page.svelte?raw';
+	// @ts-ignore
+	import * as CashfreeModule from '$lib';
+	import { paymentSessionIdStore } from '../store.js';
+	// Import with ?raw currently causing TypeScript errors, comment for now
+	// import code from './+page.svelte?raw';
 
-	import { getMode } from '../utils';
+	import { getMode } from '../utils.js';
 
-	let mode;
+	let mode: 'sandbox' | 'production';
 
 	onMount(() => {
-		mode = getMode();
+		mode = getMode() as 'sandbox' | 'production';
 	});
 
 	let isReadyForPayment = false;
-	function checkState(e) {
+	function checkState(e: CustomEvent<any>) {
 		isReadyForPayment = e.detail.isComplete;
 	}
-	let cashfreeUPICollect;
+	let cashfreeUPICollect: any;
 	let errorMsg = '';
 
-	async function doPayment(e) {
+	async function doPayment(e: Event) {
 		paymentOptions.paymentSessionId = $paymentSessionIdStore;
 		try {
 			let res = await cashfreeUPICollect.pay(paymentOptions);
 			if (!!res.error) {
 				throw new Error(res.error.message);
 			}
-		} catch (error) {
+		} catch (error: any) {
 			errorMsg = error.message;
 			console.error('Payment failed:', error);
 		}
 	}
 
-	let paymentOptions = {
+	let paymentOptions: Record<string, any> = {
 		redirectTarget: '_self',
 		redirect: 'if_required',
 		offerId: ''
 	};
+
+	// Extract UPICollect component for use in the template
+	const { UPICollect } = CashfreeModule;
 </script>
 
 <div class="flex flex-col gap-y-2 justify-left rounded-lg">
-	<h1 class="text-lg font-bold text-blue-800">Demo of Cards {mode}</h1>
+	<h1 class="text-lg font-bold text-blue-800">Demo of UPI Collect {mode}</h1>
 </div>
 
 <div class="flex flex-row rounded-lg flex-1 gap-x-4 w-1/3 p-4 mt-4 bg-blue-100">
 	<div class=" p-4 card">
 		{#if !!mode}
-			<Cashfree.Root bind:this={cashfreeUPICollect} {mode} on:complete={checkState}>
+			<CashfreeModule.Cashfree bind:this={cashfreeUPICollect} {mode} on:complete={checkState}>
 				<div class="flex flex-col gap-y-4">
 					<div class="flex flex-col gap-y-1">
-						<label class="text-sm font-medium">UPI ID</label>
-						<Cashfree.UPICollect class="input-text" placeholder="upi@somebank" />
+						<label for="upi-id" class="text-sm font-medium">UPI ID</label>
+						<UPICollect id="upi-id" class="input-text" placeholder="upi@somebank" />
 					</div>
 
 					{#if !!errorMsg}
@@ -67,13 +72,13 @@
 						</button>
 					</div>
 				</div>
-			</Cashfree.Root>
+			</CashfreeModule.Cashfree>
 		{/if}
 	</div>
 </div>
 
 <style>
-	.input-text {
+	:global(.input-text) {
 		@apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:shadow-md outline-none transition focus:border-gray-500 focus:ring-1 focus:ring-gray-500 disabled:cursor-not-allowed disabled:bg-gray-100;
 	}
 </style>

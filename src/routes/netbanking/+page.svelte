@@ -1,30 +1,37 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
-	import * as Cashfree from '$lib';
+	// @ts-ignore
+	import * as CashfreeModule from '$lib';
+	// @ts-ignore
 	import NetbankingList from '$lib/netbanking-list';
-	import { paymentSessionIdStore } from '../store';
-	import code from './+page.svelte?raw';
-	import { getMode } from '../utils';
+	import { paymentSessionIdStore } from '../store.js';
+	// Import with ?raw currently causing TypeScript errors, comment for now
+	// import code from './+page.svelte?raw';
+	import { getMode } from '../utils.js';
 
-	let mode;
+	let mode: 'sandbox' | 'production';
 
 	onMount(() => {
-		mode = getMode();
+		mode = getMode() as 'sandbox' | 'production';
 	});
 
 	let isReadyForPayment = false;
 
 	let errorMsg = '';
 
-	async function doPayment(e) {
+	async function doPayment(e: Event) {
 		errorMsg = '';
 		paymentOptions.paymentSessionId = $paymentSessionIdStore;
 		try {
-			let res = await selectedUPIApp.component.pay(paymentOptions);
-			if (!!res.error) {
-				throw new Error(res.error.message);
+			if (!!selectedUPIApp && selectedUPIApp.component) {
+				let res = await selectedUPIApp.component.pay(paymentOptions);
+				if (!!res.error) {
+					throw new Error(res.error.message);
+				}
+			} else {
+				throw new Error('Please select a payment method');
 			}
-		} catch (error) {
+		} catch (error: any) {
 			errorMsg = error.message;
 			console.error('Payment failed:', error);
 		}
@@ -36,13 +43,20 @@
 		}
 	};
 
-	let paymentOptions = {
+	let paymentOptions: Record<string, any> = {
 		redirectTarget: '_self',
 		redirect: 'if_required',
 		offerId: ''
 	};
 
-	let netbankingBanks = NetbankingList.map((item) => {
+	interface NetbankingBank {
+		netbankingBankName: string;
+		netbankingBankDisplay: string;
+		component: any;
+		selected: boolean;
+	}
+
+	let netbankingBanks: NetbankingBank[] = NetbankingList.map((item: any) => {
 		return {
 			netbankingBankName: item.netbankingBankName,
 			netbankingBankDisplay: item.netbankingBankDisplay,
@@ -51,8 +65,8 @@
 		};
 	});
 
-	let selectedUPIApp = null;
-	function selectUPIAPP(app) {
+	let selectedUPIApp: NetbankingBank | null = null;
+	function selectUPIAPP(app: NetbankingBank) {
 		for (let i = 0; i < netbankingBanks.length; i++) {
 			let appx = netbankingBanks[i];
 			if (appx.netbankingBankName === app.netbankingBankName) {
@@ -79,7 +93,7 @@
 							? 'border-2 border-blue-500'
 							: ''}  bg-white w-96 cursor-pointer h-14 p-2 flex flex-col justify-center rounded-md shadow-lg"
 					>
-						<Cashfree.Root
+						<CashfreeModule.Cashfree
 							bind:this={app.component}
 							{mode}
 							on:click={() => {
@@ -87,11 +101,17 @@
 							}}
 							class="flex flex-row gap-x-2 pl-2  justify-start"
 						>
-							<Cashfree.Netbanking netbankingBankName={app.netbankingBankName} class="w-8 h-8" />
-							<label class="text-sm cursor-pointer mt-1.5 font-medium text-center">
+							<CashfreeModule.Netbanking
+								netbankingBankName={app.netbankingBankName}
+								class="w-8 h-8"
+							/>
+							<span
+								id="bank-{app.netbankingBankName}"
+								class="text-sm cursor-pointer mt-1.5 font-medium text-center"
+							>
 								{app.netbankingBankDisplay}
-							</label>
-						</Cashfree.Root>
+							</span>
+						</CashfreeModule.Cashfree>
 					</div>
 				{/each}
 			</div>

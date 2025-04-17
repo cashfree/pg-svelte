@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import '../demo.css';
 	import { onMount, onDestroy } from 'svelte';
 	import { base } from '$app/paths';
 	import { page } from '$app/stores';
-	import { paymentSessionIdStore, env } from './store';
-	import { getMode } from './utils';
+	import { paymentSessionIdStore, env } from './store.js';
+	import { getMode } from './utils.js';
 	import { afterNavigate } from '$app/navigation';
 
 	// State for mobile sidebar toggle
@@ -17,7 +17,7 @@
 
 	//
 
-	let mode;
+	let mode: 'sandbox' | 'production';
 
 	$: {
 		// Update the context whenever paymentSessionId changes
@@ -32,7 +32,7 @@
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
 	}
-	let isMounted;
+	let isMounted: boolean;
 	// Check screen size on mount and when resized
 	onMount(() => {
 		const checkScreenSize = () => {
@@ -47,12 +47,12 @@
 		window.addEventListener('resize', checkScreenSize);
 
 		//from url get mode which is a query param
-		mode = getMode();
+		mode = getMode() as 'sandbox' | 'production';
 	});
 
 	let activeTab = '';
 
-	afterNavigate((e) => {
+	afterNavigate((e: any) => {
 		activeTab = e.to.route.id;
 	});
 
@@ -76,6 +76,13 @@
 		<div
 			class="fixed inset-0 z-20 bg-black bg-opacity-50 transition-opacity md:hidden"
 			on:click={toggleSidebar}
+			role="button"
+			tabindex="0"
+			on:keydown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					toggleSidebar();
+				}
+			}}
 		></div>
 	{/if}
 
@@ -92,7 +99,7 @@
 					<img src="/pg-svelte.png" alt="" class="w-32" />
 				</a>
 			</div>
-			<button class="md:hidden" on:click={toggleSidebar}>
+			<button class="md:hidden" aria-label="Close sidebar" on:click={toggleSidebar}>
 				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -161,7 +168,7 @@
 		<header class="bg-white border-b shadow-sm">
 			<div class="flex items-center justify-between px-6 py-3">
 				<!-- Mobile Menu Button -->
-				<button class="text-gray-500 md:hidden" on:click={toggleSidebar}>
+				<button class="text-gray-500 md:hidden" aria-label="Open menu" on:click={toggleSidebar}>
 					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"

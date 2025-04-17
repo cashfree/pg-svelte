@@ -1,27 +1,27 @@
-<script>
+<script lang="ts">
 	import { getContext } from 'svelte';
-	import { key } from './context-key';
+	import { key } from './context-key.js';
 	import { onMount, onDestroy } from 'svelte';
 	//event dispatcher
 	import { createEventDispatcher } from 'svelte';
-	import events from './events';
+	import events from './events.js';
 
 	const dispatch = createEventDispatcher();
 
 	// Accept class as a prop
 	export let className = '';
-	export let type;
+	export let type: string;
 
-	let parent;
-	export let values = {};
-	export let styles = {};
+	let parent: any;
+	export let values: Record<string, any> = {};
+	export let styles: Record<string, any> = {};
 
 	export { className as class };
 	export let styleList = '';
 	export { styleList as style };
 
-	let element;
-	export let component; //cashfree component
+	let element: HTMLElement;
+	export let component: any; //cashfree component
 
 	let eventsToBubble = [
 		{ eventName: 'ready' },
@@ -45,14 +45,15 @@
 
 		for (let i = 0; i < eventsToBubble.length; i++) {
 			const event = eventsToBubble[i];
-			const callback = event.callback;
+			// Note: callback is not used in the code, so we can remove it
+			// const callback = event.callback;
 
-			component.on(event.eventName, function (d) {
+			component.on(event.eventName, function (d: any) {
 				events.dispatchCustomEvent(parent, event.eventName, d);
 			});
 		}
 	}
-	function merge2Levels(obj1, obj2) {
+	function merge2Levels(obj1: Record<string, any>, obj2: Record<string, any>): Record<string, any> {
 		const result = { ...obj1 };
 		for (const key in obj2) {
 			if (obj2.hasOwnProperty(key)) {

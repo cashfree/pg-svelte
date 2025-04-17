@@ -8,14 +8,14 @@ import UPIAPP from './upi-app.svelte';
 import UPICollect from './upi-collect.svelte';
 import Netbanking from './netbanking.svelte';
 import Wallet from './wallet.svelte';
-import Root from './root.svelte';
+import Cashfree from './cashfree.svelte';
 
 export {
 	CardNumber,
 	CardExpiry,
 	CardHolder,
 	CardCVV,
-	Root,
+	Cashfree,
 	SaveInstrument,
 	UPIQRCode,
 	UPIAPP,

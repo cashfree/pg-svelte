@@ -1,9 +1,8 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 
-	export let component;
-
+	export let component: any;
 	export let label = 'Save Payment Instrument';
 
 	// Extract props we want to modify

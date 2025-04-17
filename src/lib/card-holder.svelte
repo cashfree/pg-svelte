@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 
-	export let component;
+	export let component: any;
 	export let placeholder = 'Name on Card';
 	let { values = {}, ...otherProps } = $$restProps;
 	if (!values.placeholder) {

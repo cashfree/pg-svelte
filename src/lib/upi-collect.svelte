@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 
-	export let component;
+	export let component: any;
 	export let placeholder = 'your upi id';
 	export let upiId = '';
 	let { values = {}, ...otherProps } = $$restProps;

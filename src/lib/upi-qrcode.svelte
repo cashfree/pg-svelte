@@ -1,10 +1,11 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 	import { createEventDispatcher } from 'svelte';
+
 	const dispatch = createEventDispatcher();
 
-	export let component;
+	export let component: any;
 	export let size = '220px';
 
 	// Extract props we want to modify

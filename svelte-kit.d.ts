@@ -1,18 +1,4 @@
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
-declare global {
-	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
-	}
-}
-
-export {};
-
-// This file provides type declarations for SvelteKit modules
+// Type definitions for SvelteKit modules
 declare module '$app/paths' {
 	export const base: string;
 	export const assets: string;
@@ -64,9 +50,18 @@ declare module '$app/navigation' {
 }
 
 declare module '$lib' {
-	// Export everything from your library index
-	import * as CashfreeComponents from '/Users/raj/pg-svelte/src/lib/index';
-	export = CashfreeComponents;
+	// Named exports for the components
+	export const CardNumber: any;
+	export const CardExpiry: any;
+	export const CardHolder: any;
+	export const CardCVV: any;
+	export const SaveInstrument: any;
+	export const UPIQRCode: any;
+	export const UPIAPP: any;
+	export const UPICollect: any;
+	export const Netbanking: any;
+	export const Wallet: any;
+	export const Root: any;
 }
 
 declare module '$lib/netbanking-list' {

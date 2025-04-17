@@ -1,17 +1,18 @@
-<script>
+<script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import BaseComponent from './base-component.svelte';
 	import { createEventDispatcher } from 'svelte';
+
 	const dispatch = createEventDispatcher();
 
-	export let component;
+	export let component: any;
 	export let provider = '';
 	export let buttonText = '';
 	export let phone = '';
 	export let buttonIcon = true;
 	export let size = '2rem';
 
-	let styles = {
+	let styles: Record<string, any> = {
 		base: {
 			fontSize: size
 		}
