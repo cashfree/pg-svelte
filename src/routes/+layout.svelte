@@ -157,6 +157,13 @@
 					>
 						<span>Wallets</span>
 					</a>
+					<a
+						href="/checkout?mode={mode}"
+						class:bg-gray-100={activeTab.includes('/checkout')}
+						class="flex text-sm font-medium items-center space-x-2 rounded-md px-4 py-2.5 text-gray-700 hover:bg-gray-100"
+					>
+						<span>Hosted Page</span>
+					</a>
 				</li>
 			</ul>
 		</nav>

@@ -385,6 +385,45 @@ Implement wallet payment options with phone number input.
 {/if}
 ```
 
+### Hosted Checkout Page
+
+```svelte
+<script>
+	import { Cashfree } from '@cashfreepayments/pg-svelte';
+	let checkoutOptions: Record<string, any> = {
+		redirectTarget: '_modal'
+	};
+	let cashfreeRoot: any;
+	let mode: 'sandbox' | 'production';
+	mode = 'sandbox';
+	async function doCheckout(e: Event) {
+		checkoutOptions.paymentSessionId = $paymentSessionIdStore;
+		try {
+			let res = await cashfreeRoot.checkout(checkoutOptions);
+			if (!!res.error) {
+				throw new Error(res.error.message);
+			}
+			if (res.redirect) {
+				// This will be true when the payment redirection page couldnt be opened in the same window
+				// This is an exceptional case only when the page is opened inside an inAppBrowser
+				// In this case the customer will be redirected to return url once payment is completed
+				console.log('Payment will be redirected');
+			}
+			if (res.paymentDetails) {
+				// This will be called whenever the payment is completed irrespective of transaction status
+				console.log('Payment has been completed, Check for Payment Status');
+				console.log(res.paymentDetails.paymentMessage);
+			}
+		} catch (error: any) {
+			errorMsg = error.message;
+			console.error('Payment failed:', error);
+		}
+	}
+</script>
+
+<Cashfree bind:this={cashfreeRoot} {mode}></Cashfree>
+```
+
 ## Event Handling
 
 Cashfree components emit various events you can listen to:
