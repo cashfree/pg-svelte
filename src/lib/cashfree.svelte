@@ -97,6 +97,10 @@
 	let { class: className = '' } = $$props;
 	let root: any;
 	let cashfreeComponents: any[] = [];
+
+	export function checkout(checkoutOptions: Record<string, any>): Promise<any> {
+		return root.cashfree.checkout(checkoutOptions);
+	}
 </script>
 
 <div class={className} bind:this={root} data-cashfree-root>
