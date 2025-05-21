@@ -1,4 +1,5 @@
 # Cashfree Payments for Svelte
+![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg) ![Build](https://img.shields.io/badge/build-stable-blue) ![GitHub Release](https://img.shields.io/github/v/release/cashfree/pg-svelte?color=brightgreen) ![NPM Downloads](https://img.shields.io/npm/dm/pg-svelte?label=NPM%20Downloads&color=brightgreen)
 
 A Svelte component library for integrating Cashfree Payment Gateway in your Svelte applications.
 
